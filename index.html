@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEXUS HUB | Ultimate Gaming Experience</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap');
+        
+        :root {
+            --neon-cyan: #00fff2;
+            --neon-purple: #a855f7;
+            --neon-orange: #ff8c00;
+            --dark-bg: #050505;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--dark-bg);
+            color: #ffffff;
+            margin: 0;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+
+        .bg-grid {
+            background-image: linear-gradient(rgba(0, 255, 242, 0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0, 255, 242, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1.5rem;
+        }
+
+        .nav-glass {
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 255, 242, 0.2);
+        }
+
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .game-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+        .game-card:hover {
+            transform: scale(1.03);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(0, 255, 242, 0.3);
+        }
+
+        #game-canvas,
+#car-game-canvas,
+button,
+.game-card,
+.ai-option,
+.mobile-nav-btn {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#game-canvas {
+    background: #000;
+    width: 100%;
+    height: 300px;
+    border-radius: 1rem;
+}
+
+#car-game-canvas {
+    background: #000;
+    width: 100%;
+    height: 300px;
+    border-radius: 1rem;
+}
+
+        .view-hidden { display: none !important; }
+
+        .tournament-card {
+            background: linear-gradient(135deg, rgba(20,20,20,1) 0%, rgba(40,40,40,1) 100%);
+            border-left: 4px solid var(--neon-cyan);
+            transition: 0.3s;
+        }
+        .tournament-card:hover {
+            transform: translateX(10px);
+            background: linear-gradient(135deg, rgba(30,30,30,1) 0%, rgba(50,50,50,1) 100%);
+        }
+
+        .status-online { color: #10b981; }
+        .status-ingame { color: var(--neon-cyan); }
+        
+        .ai-chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .chat-toggle-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00fff2, #0088ff);
+            border: none;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 4px 20px rgba(0, 255, 242, 0.4);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(0, 255, 242, 0.6);
+        }
+        
+        .chat-window {
+            width: 350px;
+            height: 500px;
+            background: rgba(10, 10, 10, 0.95);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 242, 0.2);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 30px rgba(0, 255, 242, 0.2);
+            transform: translateY(20px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-window.active {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .chat-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0, 255, 242, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-title {
+            font-weight: bold;
+            font-size: 16px;
+            color: #00fff2;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 12px 15px;
+            border-radius: 18px;
+            line-height: 1.4;
+            position: relative;
+            animation: fadeInMessage 0.3s ease;
+        }
+        
+        @keyframes fadeInMessage {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            background: linear-gradient(135deg, #0088ff, #0066cc);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .bot-message {
+            background: rgba(255, 255, 255, 0.05);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid rgba(0, 255, 242, 0.1);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 242, 0.1);
+            border-radius: 20px;
+            padding: 10px 15px;
+            color: white;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .chat-input input:focus {
+            border-color: #00fff2;
+        }
+        
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00fff2, #0088ff);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 18px;
+            align-self: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            float: left;
+            margin: 0 2px;
+            background-color: #00fff2;
+            display: block;
+            border-radius: 50%;
+            opacity: 0.4;
+        }
+        
+        .typing-indicator span:nth-of-type(1) {
+            animation: typing 1s infinite;
+        }
+        
+        .typing-indicator span:nth-of-type(2) {
+            animation: typing 1s infinite 0.2s;
+        }
+        
+        .typing-indicator span:nth-of-type(3) {
+            animation: typing 1s infinite 0.4s;
+        }
+        
+        @keyframes typing {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        /* AI Assistant Styles */
+        .ai-assistant-section {
+            background: rgba(0, 255, 242, 0.05);
+            border: 1px solid rgba(0, 255, 242, 0.2);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+        }
+        
+        .ai-assistant-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .ai-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #00fff2, #0088ff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .ai-options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .ai-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 242, 0.1);
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .ai-option:hover {
+            transform: translateY(-3px);
+            background: rgba(0, 255, 242, 0.1);
+            border-color: rgba(0, 255, 242, 0.3);
+        }
+        
+        .ai-option i {
+            font-size: 24px;
+            margin-bottom: 0.5rem;
+            color: #00fff2;
+        }
+        
+        .ai-response {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            border-left: 3px solid #00fff2;
+        }
+        
+        .response-content {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body class="bg-grid min-h-screen">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-black">
+        <div class="max-w-md w-full glass-panel p-8 text-center fade-in">
+            <div class="mb-8">
+                <div class="w-16 h-16 bg-cyan-500 rounded-xl mx-auto mb-4 flex items-center justify-center shadow-[0_0_25px_rgba(0,255,242,0.4)]">
+                    <i class="fas fa-id-card text-black text-3xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold font-orbitron tracking-widest">NEXUS<span class="text-cyan-400">HUB</span></h1>
+                <p class="text-slate-500 text-xs uppercase tracking-[0.3em] mt-2">Mobile Gaming Network</p>
+            </div>
+            
+            <form onsubmit="event.preventDefault(); handleLogin();" class="space-y-4">
+                <input type="text" id="username-input" required placeholder="Aapka Gaming Name" 
+                    class="w-full bg-black/50 border border-white/10 p-4 rounded-xl outline-none focus:border-cyan-400 transition text-white">
+                <input type="tel" id="mobile-input" required placeholder="Aapka Mobile Number" 
+                    class="w-full bg-black/50 border border-white/10 p-4 rounded-xl outline-none focus:border-cyan-400 transition text-white">
+                <select id="state-select" required class="w-full bg-black/50 border border-white/10 p-4 rounded-xl outline-none focus:border-cyan-400 transition text-white">
+                    <option value="" disabled selected>Aapki State Choose Karein</option>
+                    <option value="Andhra Pradesh">Andhra Pradesh</option>
+                    <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                    <option value="Assam">Assam</option>
+                    <option value="Bihar">Bihar</option>
+                    <option value="Chhattisgarh">Chhattisgarh</option>
+                    <option value="Goa">Goa</option>
+                    <option value="Gujarat">Gujarat</option>
+                    <option value="Haryana">Haryana</option>
+                    <option value="Himachal Pradesh">Himachal Pradesh</option>
+                    <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                    <option value="Jharkhand">Jharkhand</option>
+                    <option value="Karnataka">Karnataka</option>
+                    <option value="Kerala">Kerala</option>
+                    <option value="Madhya Pradesh">Madhya Pradesh</option>
+                    <option value="Maharashtra">Maharashtra</option>
+                    <option value="Manipur">Manipur</option>
+                    <option value="Meghalaya">Meghalaya</option>
+                    <option value="Mizoram">Mizoram</option>
+                    <option value="Nagaland">Nagaland</option>
+                    <option value="Odisha">Odisha</option>
+                    <option value="Punjab">Punjab</option>
+                    <option value="Rajasthan">Rajasthan</option>
+                    <option value="Sikkim">Sikkim</option>
+                    <option value="Tamil Nadu">Tamil Nadu</option>
+                    <option value="Telangana">Telangana</option>
+                    <option value="Tripura">Tripura</option>
+                    <option value="Uttar Pradesh">Uttar Pradesh</option>
+                    <option value="Uttarakhand">Uttarakhand</option>
+                    <option value="West Bengal">West Bengal</option>
+                </select>
+                <button type="submit" class="w-full py-4 bg-cyan-500 text-black font-black uppercase tracking-widest rounded-xl hover:bg-white transition shadow-lg active:scale-95">
+                    LOGIN TO HUB
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN UI -->
+    <div id="main-ui" class="view-hidden">
+        
+        <!-- Navigation -->
+        <nav class="fixed top-0 w-full h-20 nav-glass z-50 flex items-center justify-between px-6 lg:px-12">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-headset text-cyan-400 text-2xl animate-pulse"></i>
+                <span class="text-xl font-bold font-orbitron tracking-tighter">NEXUS</span>
+            </div>
+            
+            <div class="hidden md:flex gap-8 text-[11px] font-bold font-orbitron uppercase tracking-widest">
+                <button onclick="showTab('home')" class="nav-item text-cyan-400">Home</button>
+                <button onclick="showTab('arena')" class="nav-item text-slate-500 hover:text-white transition">Arena</button>
+                <button onclick="showTab('tournaments')" class="nav-item text-slate-500 hover:text-white transition">Tournaments</button>
+                <button onclick="showTab('social')" class="nav-item text-slate-500 hover:text-white transition">Social Hub</button>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden sm:block">
+                    <div id="display-name" class="text-cyan-400 font-bold text-xs uppercase"></div>
+                    <div class="text-[10px] text-slate-500">LEVEL 24</div>
+                </div>
+                <button onclick="location.reload()" class="w-10 h-10 rounded-full bg-zinc-900 border border-red-500/30 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </nav>
+
+        <!-- CONTENT AREA -->
+        <main class="pt-28 pb-24 px-6 max-w-7xl mx-auto">
+            
+            <!-- Tab: Home -->
+            <section id="tab-home" class="fade-in">
+                <div class="relative rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-cyan-900/20 to-zinc-900 p-8 md:p-12 border border-white/5 mb-8">
+                    <div class="relative z-10">
+                        <h4 class="text-cyan-400 font-bold uppercase tracking-[0.4em] text-xs mb-4">News & Updates</h4>
+                        <h1 class="text-4xl md:text-6xl font-black font-orbitron leading-tight mb-6 italic">WELCOME BACK<br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-white">COMMANDER</span></h1>
+                        <div class="flex gap-4">
+                            <button onclick="showTab('arena')" class="px-8 py-4 bg-cyan-500 text-black font-black uppercase tracking-widest rounded-xl hover:bg-white transition-all">Play Now</button>
+                            <button onclick="showTab('tournaments')" class="px-8 py-4 bg-white/5 border border-white/10 text-white font-bold uppercase tracking-widest rounded-xl hover:bg-white/10 transition">Events</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass-panel p-8">
+                        <h3 class="font-orbitron font-bold text-lg mb-6 flex items-center gap-3">
+                            <i class="fas fa-trophy text-yellow-500"></i> DAILY MISSIONS
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 bg-black/40 rounded-xl border border-white/5">
+                                <span class="text-sm">Nexus Runner mein 500 score karo</span>
+                                <span class="text-cyan-400 font-bold text-xs">+100 XP</span>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-black/40 rounded-xl border border-white/5">
+                                <span class="text-sm">1 Friend add karein</span>
+                                <span class="text-green-400 font-bold text-xs">+50 Tokens</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-8">
+                        <h3 class="font-orbitron font-bold text-lg mb-6 flex items-center gap-3">
+                            <i class="fas fa-chart-line text-cyan-400"></i> YOUR STATS
+                        </h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="text-center p-4 bg-black/40 rounded-xl">
+                                <div class="text-2xl font-bold font-orbitron">124</div>
+                                <div class="text-[10px] text-slate-500 uppercase">Matches</div>
+                            </div>
+                            <div class="text-center p-4 bg-black/40 rounded-xl">
+                                <div class="text-2xl font-bold font-orbitron text-cyan-400">82%</div>
+                                <div class="text-[10px] text-slate-500 uppercase">Win Rate</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: Arena -->
+            <section id="tab-arena" class="view-hidden fade-in">
+                <h2 class="text-3xl font-bold font-orbitron mb-8">SELECT <span class="text-cyan-400">GAME</span></h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div onclick="initGame()" class="game-card h-72 bg-zinc-900 rounded-3xl border border-white/5 group relative">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent z-10"></div>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-20">
+                            <i class="fas fa-running text-cyan-400 text-6xl mb-4 group-hover:scale-110 transition-transform"></i>
+                            <h3 class="font-orbitron font-bold text-2xl">NEXUS RUNNER</h3>
+                            <p class="text-xs text-slate-400 mt-2">Dodge obstacles & set highscores</p>
+                        </div>
+                        <div class="absolute bottom-4 left-0 w-full text-center z-20">
+                            <span class="px-4 py-1 bg-cyan-500 text-black text-[10px] font-bold rounded-full">ACTIVE</span>
+                        </div>
+                    </div>
+                    
+                    <div onclick="initCarGame()" class="game-card h-72 bg-zinc-900 rounded-3xl border border-white/5 group relative">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent z-10"></div>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-20">
+                            <i class="fas fa-car text-cyan-400 text-6xl mb-4 group-hover:scale-110 transition-transform"></i>
+                            <h3 class="font-orbitron font-bold text-2xl">CAR RACER</h3>
+                            <p class="text-xs text-slate-400 mt-2">Realistic traffic driving game</p>
+                        </div>
+                        <div class="absolute bottom-4 left-0 w-full text-center z-20">
+                            <span class="px-4 py-1 bg-cyan-500 text-black text-[10px] font-bold rounded-full">ACTIVE</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: Tournaments -->
+            <section id="tab-tournaments" class="view-hidden fade-in">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-bold font-orbitron italic">LIVE <span class="text-cyan-400">EVENTS</span></h2>
+                    <span class="px-4 py-2 glass-panel text-xs font-bold text-cyan-400">Total Prize Pool: $5,000</span>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="tournament-card p-6 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-6">
+                        <div class="flex items-center gap-6">
+                            <div class="w-16 h-16 bg-cyan-500/10 rounded-xl flex items-center justify-center border border-cyan-500/20">
+                                <i class="fas fa-shield-alt text-cyan-400 text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-orbitron font-bold text-lg">PRO LEAGUE SEASON 4</h3>
+                                <p class="text-xs text-slate-400 mt-1">Free Fire Max • Squad Mode • Starts in 2h 45m</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-8">
+                            <div class="text-center">
+                                <div class="text-sm font-bold text-yellow-500">₹10,000</div>
+                                <div class="text-[10px] text-slate-500 uppercase">Prize Pool</div>
+                            </div>
+                            <button class="px-6 py-3 bg-cyan-500 text-black font-bold text-xs rounded-lg hover:bg-white transition uppercase">Join Now</button>
+                        </div>
+                    </div>
+
+                    <div class="tournament-card p-6 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-6 opacity-80">
+                        <div class="flex items-center gap-6">
+                            <div class="w-16 h-16 bg-purple-500/10 rounded-xl flex items-center justify-center border border-purple-500/20">
+                                <i class="fas fa-bolt text-purple-400 text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-orbitron font-bold text-lg">NEXUS SPRINT CHAMPIONSHIP</h3>
+                                <p class="text-xs text-slate-400 mt-1">Nexus Runner • Solo • Starts Tomorrow</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-8">
+                            <div class="text-center">
+                                <div class="text-sm font-bold text-purple-500">5,000 Tokens</div>
+                                <div class="text-[10px] text-slate-500 uppercase">Prize Pool</div>
+                            </div>
+                            <button class="px-6 py-3 border border-white/20 text-white font-bold text-xs rounded-lg hover:bg-white/10 transition uppercase">Registered</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: Social -->
+            <section id="tab-social" class="view-hidden fade-in">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Feed -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="glass-panel p-6">
+                            <div class="flex gap-4">
+                                <div class="w-10 h-10 bg-zinc-800 rounded-full flex-shrink-0"></div>
+                                <div class="flex-grow">
+                                    <textarea id="post-input" placeholder="Kuch naya share karein..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-sm outline-none focus:border-cyan-400 mb-4 h-24 resize-none"></textarea>
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex gap-4 text-slate-500 text-sm">
+                                            <i class="far fa-image hover:text-cyan-400 cursor-pointer"></i>
+                                            <i class="fas fa-video hover:text-cyan-400 cursor-pointer"></i>
+                                        </div>
+                                        <button onclick="createPost()" class="px-6 py-2 bg-cyan-500 text-black font-bold text-xs rounded-lg uppercase">Post</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="social-feed" class="space-y-6">
+                            <!-- Example Post -->
+                            <div class="glass-panel p-6">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-10 h-10 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-500/30 text-cyan-400 font-bold">AK</div>
+                                    <div>
+                                        <div class="text-sm font-bold">Aniket_King <span class="text-[10px] bg-cyan-500/10 text-cyan-400 px-2 rounded-full ml-2">PRO</span></div>
+                                        <div class="text-[10px] text-slate-500 uppercase">2 Hours Ago</div>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-slate-300 mb-4 leading-relaxed">Maine aaj Nexus Runner mein 2,500 ka highscore banaya! Koi hai jo ye record tod sake? 😎🔥</p>
+                                <div class="flex gap-6 text-slate-500 text-xs">
+                                    <span class="hover:text-red-500 cursor-pointer transition"><i class="far fa-heart mr-1"></i> 24 Likes</span>
+                                    <span class="hover:text-cyan-400 cursor-pointer transition"><i class="far fa-comment mr-1"></i> 8 Comments</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Friends List -->
+                    <div class="space-y-6">
+                        <div class="glass-panel p-6">
+                            <h3 class="font-orbitron font-bold text-sm mb-6 uppercase tracking-widest">Friends Online</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 bg-zinc-800 rounded-full border border-green-500"></div>
+                                        <div>
+                                            <div class="text-xs font-bold">Gamer_Boy_99</div>
+                                            <div class="text-[9px] status-online">Online</div>
+                                        </div>
+                                    </div>
+                                    <button class="text-cyan-400 text-xs"><i class="fas fa-comment"></i></button>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 bg-zinc-800 rounded-full border border-cyan-500"></div>
+                                        <div>
+                                            <div class="text-xs font-bold">Legend_X</div>
+                                            <div class="text-[9px] status-ingame">Playing Runner</div>
+                                        </div>
+                                    </div>
+                                    <button class="text-cyan-400 text-xs"><i class="fas fa-comment"></i></button>
+                                </div>
+                                <div class="flex items-center justify-between opacity-50">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 bg-zinc-800 rounded-full border border-zinc-600"></div>
+                                        <div>
+                                            <div class="text-xs font-bold">Killer_Queen</div>
+                                            <div class="text-[9px] text-slate-500">Offline</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="w-full mt-6 py-3 border border-white/5 bg-white/5 rounded-xl text-[10px] font-bold uppercase hover:bg-white/10 transition">Find More Friends</button>
+                        </div>
+                        
+                        <!-- AI Assistant Section -->
+                        <div class="ai-assistant-section">
+                            <div class="ai-assistant-header">
+                                <div class="ai-icon">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-orbitron font-bold text-lg">AI Assistant</h3>
+                                    <p class="text-xs text-slate-400">Ask for game tips or advice</p>
+                                </div>
+                            </div>
+                            
+                            <div class="ai-options-grid">
+                                <div class="ai-option" onclick="askAI('How to improve my Nexus Runner score?')">
+                                    <i class="fas fa-gamepad"></i>
+                                    <div>Game Tips</div>
+                                </div>
+                                <div class="ai-option" onclick="askAI('What are the best strategies for Free Fire?')">
+                                    <i class="fas fa-chess"></i>
+                                    <div>Strategies</div>
+                                </div>
+                                <div class="ai-option" onclick="askAI('What are the upcoming tournaments?')">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <div>Events</div>
+                                </div>
+                                <div class="ai-option" onclick="askAI('How to get more tokens?')">
+                                    <i class="fas fa-coins"></i>
+                                    <div>Rewards</div>
+                                </div>
+                            </div>
+                            
+                            <div class="ai-response" id="ai-response">
+                                <div class="font-bold text-cyan-400 mb-2">AI Response:</div>
+                                <div class="response-content" id="response-content">
+                                    Hello! I'm your Nexus Hub AI assistant. Ask me anything about games, strategies, or events!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Game View Area -->
+            <section id="tab-game" class="view-hidden fade-in max-w-4xl mx-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <button onclick="showTab('arena')" class="text-xs font-bold uppercase text-slate-500 hover:text-white"><i class="fas fa-arrow-left mr-2"></i> Back to Arena</button>
+                    <div class="font-orbitron font-bold text-cyan-400 text-2xl" id="score-display">0</div>
+                </div>
+                
+                <div class="relative bg-zinc-900 rounded-3xl p-4 border border-cyan-500/20 overflow-hidden shadow-[0_0_50px_rgba(0,255,242,0.1)]">
+                    <canvas id="game-canvas"></canvas>
+                    
+                    <div id="game-over" class="absolute inset-0 bg-black/90 flex flex-col items-center justify-center z-50 view-hidden backdrop-blur-sm">
+                        <h2 class="text-6xl font-black font-orbitron text-red-500 mb-2 italic">GAME OVER</h2>
+                        <p id="final-score" class="text-xl font-bold mb-8 text-white">Score: 0</p>
+                        <button onclick="initGame()" class="px-12 py-4 bg-cyan-500 text-black font-black rounded-xl uppercase tracking-widest hover:bg-white transition shadow-[0_0_20px_rgba(0,255,242,0.4)]">RETRY RUN</button>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-center gap-12 text-slate-500 uppercase text-[10px] font-bold tracking-widest">
+                    <span><i class="fas fa-keyboard mr-2"></i> SPACE TO JUMP</span>
+                    <span><i class="fas fa-fingerprint mr-2"></i> TAP TO JUMP</span>
+                </div>
+            </section>
+
+            <!-- Car Game View Area -->
+            <section id="tab-car-game" class="view-hidden fade-in max-w-4xl mx-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <button onclick="showTab('arena')" class="text-xs font-bold uppercase text-slate-500 hover:text-white"><i class="fas fa-arrow-left mr-2"></i> Back to Arena</button>
+                    <div class="font-orbitron font-bold text-cyan-400 text-2xl" id="car-score-display">0</div>
+                </div>
+                
+                <div class="relative bg-zinc-900 rounded-3xl p-4 border border-cyan-500/20 overflow-hidden shadow-[0_0_50px_rgba(0,255,242,0.1)]">
+                    <canvas id="car-game-canvas"></canvas>
+                    
+                    <div id="car-game-over" class="absolute inset-0 bg-black/90 flex flex-col items-center justify-center z-50 view-hidden backdrop-blur-sm">
+                        <h2 class="text-6xl font-black font-orbitron text-red-500 mb-2 italic">GAME OVER</h2>
+                        <p id="car-final-score" class="text-xl font-bold mb-8 text-white">Score: 0</p>
+                        <button onclick="initCarGame()" class="px-12 py-4 bg-cyan-500 text-black font-black rounded-xl uppercase tracking-widest hover:bg-white transition shadow-[0_0_20px_rgba(0,255,242,0.4)]">RETRY DRIVE</button>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-center gap-12 text-slate-500 uppercase text-[10px] font-bold tracking-widest">
+                    <span><i class="fas fa-keyboard mr-2"></i> ARROW KEYS TO DRIVE</span>
+                    <span><i class="fas fa-fingerprint mr-2"></i> TOUCH TO CHANGE LANE</span>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Mobile Bottom Nav -->
+        <nav class="md:hidden fixed bottom-0 w-full h-20 bg-black/80 backdrop-blur-xl border-t border-white/10 flex items-center justify-around px-4 z-50">
+            <button onclick="showTab('home')" class="mobile-nav-btn flex flex-col items-center gap-1 text-cyan-400">
+                <i class="fas fa-home text-lg"></i>
+                <span class="text-[9px] font-bold uppercase">Home</span>
+            </button>
+            <button onclick="showTab('arena')" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-500">
+                <i class="fas fa-gamepad text-lg"></i>
+                <span class="text-[9px] font-bold uppercase">Arena</span>
+            </button>
+            <button onclick="showTab('tournaments')" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-500">
+                <i class="fas fa-trophy text-lg"></i>
+                <span class="text-[9px] font-bold uppercase">Events</span>
+            </button>
+            <button onclick="showTab('social')" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-500">
+                <i class="fas fa-users text-lg"></i>
+                <span class="text-[9px] font-bold uppercase">Social</span>
+            </button>
+        </nav>
+
+        <!-- AI Chat Widget -->
+        <div class="ai-chat-container">
+            <button class="chat-toggle-btn" id="chat-toggle">
+                <i class="fas fa-robot"></i>
+            </button>
+            <div class="chat-window" id="chat-window">
+                <div class="chat-header">
+                    <div class="chat-title">AI Assistant</div>
+                    <button class="close-btn" id="close-chat">&times;</button>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message bot-message">
+                        Hello! I'm your Nexus Hub AI assistant. How can I help you today?
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="chat-input" placeholder="Type your message...">
+                    <button class="send-btn" id="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    document.querySelectorAll('button, .game-card, .ai-option').forEach(el => {
+
+    el.addEventListener('touchstart', function() {
+        this.style.opacity = '0.8';
+    }, { passive: true });
+
+    el.addEventListener('touchend', function() {
+        this.style.opacity = '1';
+    }, { passive: true });
+
+});
+    <script>
+        // UI CONTROL
+        let username = "Player";
+        let mobileNumber = "";
+        let userState = "";
+
+        function handleLogin() {
+            const input = document.getElementById('username-input').value;
+            const mobileInput = document.getElementById('mobile-input').value;
+            const stateSelect = document.getElementById('state-select').value;
+            
+            if(!input || !mobileInput || !stateSelect) return;
+            
+            username = input;
+            mobileNumber = mobileInput;
+            userState = stateSelect;
+            
+            document.getElementById('display-name').innerText = "@" + username;
+            document.getElementById('login-screen').classList.add('view-hidden');
+            document.getElementById('main-ui').classList.remove('view-hidden');
+        }
+
+        function showTab(tab) {
+            ['home', 'arena', 'social', 'game', 'car-game', 'tournaments'].forEach(t => {
+                const el = document.getElementById('tab-' + t);
+                if(el) el.classList.add('view-hidden');
+            });
+            document.getElementById('tab-' + tab).classList.remove('view-hidden');
+            
+            // Desktop Nav Update
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('text-cyan-400');
+                item.classList.add('text-slate-500');
+            });
+            
+            // Mobile Nav Update
+            document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+                btn.classList.remove('text-cyan-400');
+                btn.classList.add('text-slate-500');
+            });
+
+            gameRunning = false; 
+        }
+
+        function createPost() {
+            const input = document.getElementById('post-input');
+            const feed = document.getElementById('social-feed');
+            if(!input.value) return;
+
+            const post = document.createElement('div');
+            post.className = 'glass-panel p-6 fade-in';
+            post.innerHTML = `
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-500/30 text-cyan-400 font-bold">${username.substring(0,2).toUpperCase()}</div>
+                    <div>
+                        <div class="text-sm font-bold">${username}</div>
+                        <div class="text-[10px] text-slate-500 uppercase">Just Now</div>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-300 mb-4 leading-relaxed">${input.value}</p>
+                <div class="flex gap-6 text-slate-500 text-xs">
+                    <span class="hover:text-red-500 cursor-pointer transition"><i class="far fa-heart mr-1"></i> 0 Likes</span>
+                    <span class="hover:text-cyan-400 cursor-pointer transition"><i class="far fa-comment mr-1"></i> 0 Comments</span>
+                </div>
+            `;
+            feed.prepend(post);
+            input.value = "";
+        }
+
+        // GAME ENGINE (Nexus Runner)
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        let gameRunning = false;
+        let score = 0;
+        let player = { x: 80, y: 0, w: 40, h: 40, dy: 0, jump: 12, gravity: 0.7 };
+        let obstacles = [];
+        let animationId;
+
+        function initGame() {
+            showTab('game');
+            document.getElementById('game-over').classList.add('view-hidden');
+            
+            canvas.width = canvas.parentElement.clientWidth - 32;
+            canvas.height = 300;
+            
+            score = 0;
+            player.y = canvas.height - 80;
+            player.dy = 0;
+            obstacles = [];
+            gameRunning = true;
+            gameLoop();
+        }
+
+        function gameLoop() {
+            if(!gameRunning) return;
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            
+            score++;
+            document.getElementById('score-display').innerText = Math.floor(score/10);
+
+            // Ground
+            ctx.strokeStyle = 'rgba(0, 255, 242, 0.2)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 260);
+            ctx.lineTo(canvas.width, 260);
+            ctx.stroke();
+
+            // Player Physics
+            player.dy += player.gravity;
+            player.y += player.dy;
+
+            if(player.y > 260 - player.h) {
+                player.y = 260 - player.h;
+                player.dy = 0;
+            }
+
+            // Draw Player (Neon Cube)
+            ctx.fillStyle = '#00fff2';
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#00fff2';
+            ctx.fillRect(player.x, player.y, player.w, player.h);
+            ctx.shadowBlur = 0;
+
+            // Spawn Obstacles
+            if(score % 90 === 0) {
+                obstacles.push({ x: canvas.width, y: 220, w: 30, h: 40 });
+            }
+
+            obstacles.forEach((obs, index) => {
+                obs.x -= (7 + score/1200);
+                
+                // Draw Obstacle
+                ctx.fillStyle = '#ff3e3e';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#ff3e3e';
+                ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+                ctx.shadowBlur = 0;
+
+                // Collision Detection
+                if(player.x < obs.x + obs.w && player.x + player.w > obs.x &&
+                   player.y < obs.y + obs.h && player.y + player.h > obs.y) {
+                    endGame();
+                }
+
+                if(obs.x + obs.w < 0) obstacles.splice(index, 1);
+            });
+
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        function endGame() {
+            gameRunning = false;
+            cancelAnimationFrame(animationId);
+            document.getElementById('game-over').classList.remove('view-hidden');
+            document.getElementById('final-score').innerText = "Score: " + Math.floor(score/10);
+        }
+
+        function jump() {
+            if(gameRunning && player.y >= 260 - player.h - 5) {
+                player.dy = -player.jump;
+            }
+        }
+
+        window.addEventListener('keydown', (e) => { if(e.code === 'Space') jump(); });
+       canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    jump();
+}, { passive: false });
+        // CAR GAME ENGINE
+        const carCanvas = document.getElementById('car-game-canvas');
+        const carCtx = carCanvas.getContext('2d');
+        let carGameRunning = false;
+        let carScore = 0;
+        let playerCar = { x: 150, y: 220, w: 40, h: 70 };
+        let lanes = [80, 150, 220];
+        let lane = 1;
+        let cars = [];
+        let roadLines = [];
+
+        function initCarGame() {
+            showTab('car-game');
+            document.getElementById('car-game-over').classList.add('view-hidden');
+            
+            carCanvas.width = carCanvas.parentElement.clientWidth - 32;
+            carCanvas.height = 300;
+            
+            carScore = 0;
+            lane = 1;
+            playerCar.x = lanes[lane];
+            cars = [];
+            roadLines = [];
+            carGameRunning = true;
+            
+            // Initialize road lines
+            for(let i = 0; i < 20; i++) {
+                roadLines.push({
+                    y: i * 40,
+                    speed: 4
+                });
+            }
+            
+            carGameLoop();
+        }
+
+        function carGameLoop() {
+            if(!carGameRunning) return;
+            carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
+            
+            carScore++;
+            document.getElementById('car-score-display').innerText = Math.floor(carScore/10);
+
+            // Draw Road
+            carCtx.fillStyle = '#2a2a2a';
+            carCtx.fillRect(0, 0, carCanvas.width, carCanvas.height);
+            
+            // Draw Lane Markings
+            carCtx.strokeStyle = '#ffffff';
+            carCtx.lineWidth = 2;
+            carCtx.setLineDash([20, 20]);
+            carCtx.beginPath();
+            carCtx.moveTo(120, 0);
+            carCtx.lineTo(120, carCanvas.height);
+            carCtx.stroke();
+            
+            carCtx.beginPath();
+            carCtx.moveTo(190, 0);
+            carCtx.lineTo(190, carCanvas.height);
+            carCtx.stroke();
+            carCtx.setLineDash([]);
+            
+            // Move road lines
+            for(let i = 0; i < roadLines.length; i++) {
+                roadLines[i].y += roadLines[i].speed;
+                if(roadLines[i].y > carCanvas.height) {
+                    roadLines[i].y = -20;
+                }
+                carCtx.fillStyle = '#ffffff';
+                carCtx.fillRect(carCanvas.width/2 - 5, roadLines[i].y, 10, 20);
+            }
+
+            // Draw Player Car
+            carCtx.fillStyle = '#00fff2';
+            carCtx.shadowBlur = 20;
+            carCtx.shadowColor = '#00fff2';
+            carCtx.fillRect(playerCar.x, playerCar.y, playerCar.w, playerCar.h);
+            carCtx.shadowBlur = 0;
+
+            // Draw opponent cars
+            if(carScore % 60 === 0) {
+                const laneIndex = Math.floor(Math.random() * 3);
+                cars.push({
+                    x: lanes[laneIndex],
+                    y: -100,
+                    w: 40,
+                    h: 70,
+                    speed: 3 + Math.random() * 3
+                });
+            }
+
+            for(let i = cars.length - 1; i >= 0; i--) {
+                cars[i].y += cars[i].speed;
+                
+                // Draw car
+                carCtx.fillStyle = '#ff3e3e';
+                carCtx.shadowBlur = 10;
+                carCtx.shadowColor = '#ff3e3e';
+                carCtx.fillRect(cars[i].x, cars[i].y, cars[i].w, cars[i].h);
+                carCtx.shadowBlur = 0;
+                
+                // Collision detection
+                if(playerCar.x < cars[i].x + cars[i].w &&
+                   playerCar.x + playerCar.w > cars[i].x &&
+                   playerCar.y < cars[i].y + cars[i].h &&
+                   playerCar.y + playerCar.h > cars[i].y) {
+                    endCarGame();
+                }
+                
+                // Remove cars that go off screen
+                if(cars[i].y > carCanvas.height) {
+                    cars.splice(i, 1);
+                }
+            }
+
+            requestAnimationFrame(carGameLoop);
+        }
+
+        function moveCar(direction) {
+            if(!carGameRunning) return;
+            if(direction === 'left' && lane > 0) {
+                lane--;
+            } else if(direction === 'right' && lane < 2) {
+                lane++;
+            }
+            playerCar.x = lanes[lane];
+        }
+
+        function endCarGame() {
+            carGameRunning = false;
+            document.getElementById('car-game-over').classList.remove('view-hidden');
+            document.getElementById('car-final-score').innerText = "Score: " + Math.floor(carScore/10);
+        }
+
+        // Handle keyboard input
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowLeft') moveCar('left');
+            if(e.key === 'ArrowRight') moveCar('right');
+        });
+
+        // Handle touch input for car game
+       carCanvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+
+    const rect = carCanvas.getBoundingClientRect();
+    const touchX = e.touches[0].clientX - rect.left;
+
+    if (touchX < carCanvas.width / 2) {
+        moveCar('left');
+    } else {
+        moveCar('right');
+    }
+}, { passive: false });
+
+        // AI Chat Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatToggle = document.getElementById('chat-toggle');
+            const chatWindow = document.getElementById('chat-window');
+            const closeChat = document.getElementById('close-chat');
+            const chatMessages = document.getElementById('chat-messages');
+            const chatInput = document.getElementById('chat-input');
+            const sendBtn = document.getElementById('send-btn');
+
+            // Toggle chat window
+            chatToggle.addEventListener('click', function() {
+                chatWindow.classList.toggle('active');
+            });
+
+            closeChat.addEventListener('click', function() {
+                chatWindow.classList.remove('active');
+            });
+
+            // Send message function
+            function sendMessage() {
+                const message = chatInput.value.trim();
+                if(message) {
+                    // Add user message
+                    addMessage(message, 'user');
+                    chatInput.value = '';
+
+                    // Show typing indicator
+                    const typingIndicator = document.createElement('div');
+                    typingIndicator.className = 'typing-indicator';
+                    typingIndicator.id = 'typing-indicator';
+                    typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+                    chatMessages.appendChild(typingIndicator);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                    // Simulate AI response after delay
+                    setTimeout(() => {
+                        typingIndicator.remove();
+                        const responses = [
+                            "I'm here to assist you with any gaming queries!",
+                            "That's interesting! What else would you like to know?",
+                            "Have you tried the latest tournament events?",
+                            "You can check your stats in the main menu.",
+                            "Need help with Nexus Runner? Just ask!",
+                            "I'm monitoring the game updates for you.",
+                            "Feel free to ask anything about our gaming community!"
+                        ];
+                        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                        addMessage(randomResponse, 'bot');
+                    }, 1500);
+                }
+            }
+
+            // Add message to chat
+            function addMessage(text, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}-message`;
+                messageDiv.textContent = text;
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Event listeners
+            sendBtn.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', function(e) {
+                if(e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            // Initial welcome message
+            setTimeout(() => {
+                addMessage("Welcome to Nexus Hub AI Assistant! I'm here to help with your gaming experience.", 'bot');
+            }, 1000);
+        });
+
+        // AI Assistant Functions for Social Hub
+        function askAI(question) {
+            const responseContent = document.getElementById('response-content');
+            const aiResponse = document.querySelector('.ai-response');
+            
+            // Show typing effect
+            aiResponse.style.opacity = 0;
+            setTimeout(() => {
+                responseContent.innerHTML = '<div class="text-cyan-400">Thinking...</div>';
+            }, 300);
+            
+            setTimeout(() => {
+                const responses = {
+                    "How to improve my Nexus Runner score?": "To improve your Nexus Runner score, practice regularly! Focus on timing your jumps perfectly to avoid obstacles. Try to maintain a steady pace and watch out for the gaps between platforms. Consistent practice will definitely boost your scores!",
+                    "What are the best strategies for Free Fire?": "In Free Fire, teamwork is key! Communicate with your squad, choose your weapons wisely based on the situation, and always stay aware of your surroundings. Position yourself strategically during fights and make sure to loot efficiently without exposing yourself too much!",
+                    "What are the upcoming tournaments?": "We have several exciting tournaments coming up! Check back soon for details about upcoming events including seasonal competitions and special challenge events. Stay tuned for more updates!",
+                    "How to get more tokens?": "Tokens can be earned through daily login rewards, completing missions, participating in tournaments, and achieving milestones in games. Also, invite friends to join the Nexus Hub for bonus tokens!"
+                };
+                
+                const response = responses[question] || "I've noted your question about '" + question + "'. This feature is under development. Please check back later for more detailed assistance!";
+                
+                responseContent.innerHTML = response;
+                aiResponse.style.opacity = 1;
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
